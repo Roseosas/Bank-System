@@ -10,6 +10,7 @@ public class BankAccount {
     }
 
     public  double ckeckBalance(){
+
         return balance;
     }
 
@@ -22,7 +23,7 @@ public class BankAccount {
         return false;
     }
 
-    private void deposit(double amount) {
+    public void deposit(double amount) {
         balance += amount;
     }
 }
