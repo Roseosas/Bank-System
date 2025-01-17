@@ -1,12 +1,19 @@
 package Service;
 
 import Enums.Role;
+import models.BankAccount;
 import models.User;
 
 import java.util.List;
+import java.util.Map;
 
 public interface UserService {
-    public boolean registerUser(User user, Role role);
-    public User login(String email, String password);
-    public List<User> getAllUsers(User loggedInUser);
+    boolean registerUser(String email, String password, String name, String userId, Role role);
+    User login(String email, String password);
+    List<User> viewUsers();
+    boolean deleteUser(String userId);
+    User getCurrentUser();
+    Map<String, User> getUsers();
+
+
 }

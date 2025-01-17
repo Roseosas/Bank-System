@@ -1,29 +1,41 @@
 package models;
 
-public class BankAccount {
-    private String accountId;
-    private double balance;
+import java.math.BigDecimal;
 
-    public BankAccount(String accountId, double balance){
-        this.accountId= accountId;
+public class BankAccount {
+    private String accountNumber;
+    private BigDecimal balance;
+
+    public BankAccount(String accountNumber, BigDecimal balance){
+        this.accountNumber= accountNumber;
         this.balance= balance;
     }
 
-    public  double ckeckBalance(){
+    public String getAccountNumber() {
+        return accountNumber;
+    }
+
+    public BigDecimal getBalance(){
 
         return balance;
     }
+    public void credit(BigDecimal amount){
+        this.balance= this.balance.add(amount);
+    }
+    public void debit(BigDecimal amount){
+        this.balance= this.balance.subtract(amount);
 
-    public boolean transferfunds(BankAccount toAccount, double amount) {
-        if (amount > 0 && balance >= amount){
-            balance -= amount;
-            toAccount.deposit(amount);
-            return true;
-        }
-        return false;
+    }
+    public void setBalance(BigDecimal amount){
+        this.balance= amount;
     }
 
-    public void deposit(double amount) {
-        balance += amount;
+
+    @Override
+    public String toString() {
+        return "BankAccount{" +
+                "accountNumber='" + accountNumber + '\'' +
+                ", balance=" + balance +
+                '}';
     }
 }

@@ -1,8 +1,20 @@
 package Service;
 
 import models.BankAccount;
+import models.User;
+
+import java.math.BigDecimal;
+import java.util.Map;
 
 public interface AccountService {
-    public boolean checkBalance();
-    public boolean transferFunds(BankAccount toAccount, double amount);
+    void checkBalance();
+    boolean transferFunds(String toAccount, String fromAccount, BigDecimal amount);
+    //BankAccount createAccount (String UserId, String accountNumber);
+
+    BankAccount createAccount(String UserId);
+
+    boolean setBalance(BigDecimal amount, String password);
+    User getCurrentUser();
+    Map<String,BankAccount> getAccount();
+
 }

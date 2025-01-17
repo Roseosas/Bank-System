@@ -1,115 +1,199 @@
+import Enums.Role;
+import Service.AccountService;
+import Service.Implementation.AccountServiceImplementation;
+import Service.Implementation.UserServiceImplementation;
+import Service.UserService;
 import models.BankAccount;
 import models.Customer;
 import models.User;
 
+import java.math.BigDecimal;
+import java.util.Scanner;
+
+import static Enums.Role.Admin;
+
 public class Main {
-    public static void main(String[] args){
-        // Admin Menu Options
-        private static void showAdminMenu() {
-            System.out.println("1. View All Users");
-            System.out.println("2. Delete User");
-            System.out.println("3. Logout");
-            System.out.print("Choose an option: ");
-            int choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
-            switch (choice) {
-                case 1:
-                    viewAllUsers();
-                    break;
-                case 2:
-                    deleteUser();
-                    break;
-                case 3:
-                    loggedInUser = null;
-                    break;
-                default:
-                    System.out.println("Invalid option.");
-                    break;
+    private static  final Scanner scanner = new Scanner(System.in);
+    private static final UserService userService = UserServiceImplementation.getInstance();
+    private static final AccountService accountService = AccountServiceImplementation.getInstance();
+    private static int x =1;
+    private static int choice;
+
+
+
+    public static void main(String[] args) {
+        mainMenu();
+
+    }
+
+
+        private static void registerUser () {
+            System.out.println("Enter your name");
+            String name = scanner.nextLine();
+
+            System.out.println("Enter your email");
+            String email = scanner.nextLine();
+
+            System.out.println("Enter a valid password");
+            String password = scanner.nextLine();
+
+            System.out.println("Enter your ID");
+            String userId = scanner.nextLine();
+
+            System.out.println("Enter your role");
+            String role = scanner.nextLine();
+
+            userService.registerUser(email, password, name, userId, Role.valueOf(role));
+        }
+
+        private static void login () {
+            System.out.println("Enter your email");
+            String email = scanner.nextLine();
+
+            System.out.println("Enter your password");
+            String password = scanner.nextLine();
+
+            userService.login(email, password);
+            if (userService.getCurrentUser().getRole() == Admin) {
+                x = 2;
+                showAdminMenu();
+            } else {
+                x = 3;
+                showCustomerMenu();
             }
+        }
+        private static void setBalance () {
+            System.out.println("Enter amount");
+            BigDecimal amount = BigDecimal.valueOf(scanner.nextInt());
+            System.out.println("Enter your password");
+            scanner.nextLine();
+            String password = scanner.nextLine();
+            accountService.setBalance(amount, password);
+        }
+
+        public static void transferFunds () {
+            System.out.println(("Enter sender's account number"));
+            String senderAccount = scanner.nextLine();
+            System.out.println("Enter beneficiary account number");
+            String beneficiaryAccount = scanner.nextLine();
+            System.out.println("Enter the amount");
+            BigDecimal amount = BigDecimal.valueOf(scanner.nextInt());
+            AccountServiceImplementation.getInstance().transferFunds(senderAccount, beneficiaryAccount, amount);
         }
 
         // Admin functionality: View all users
-        private static void viewAllUsers() {
+        private static void viewUsers () {
             System.out.println("All users:");
-            for (User user : userService.getAllUsers(loggedInUser)) {
+            for (User user : userService.viewUsers()) {
                 System.out.println(user.getName() + " (" + user.getRole() + ")");
             }
         }
 
         // Admin functionality: Delete a user
-        private static void deleteUser() {
+        private static void deleteUser () {
             System.out.print("Enter user ID to delete: ");
             String userId = scanner.nextLine();
-            if (userService.deleteUser(userId, loggedInUser)) {
-                System.out.println("User deleted successfully.");
-            } else {
-                System.out.println("Failed to delete user.");
-            }
+
+            userService.deleteUser(userId);
         }
 
+        private static void createAccount () {
+            System.out.println("Enter your User ID: ");
+            String userId = scanner.nextLine();
+            accountService.createAccount(userId);
+        }
+
+
         // Customer Menu Options
-        private static void showCustomerMenu() {
-            System.out.println("1. Check Balance");
+        private static void showCustomerMenu () {
+            System.out.println("1. Login as a user");
             System.out.println("2. Transfer Funds");
-            System.out.println("3. Logout");
+            System.out.println("3. Check balance");
+            System.out.println("4. Create an account");
+            System.out.println("5. Set balance");
             System.out.print("Choose an option: ");
             int choice = scanner.nextInt();
             scanner.nextLine(); // Consume newline
             switch (choice) {
                 case 1:
-                    checkBalance();
+                    login();
                     break;
                 case 2:
                     transferFunds();
                     break;
                 case 3:
-                    loggedInUser = null;
+                    accountService.checkBalance();
                     break;
+                case 4:
+                    createAccount();
+                    break;
+                case 5:
+                    setBalance();
+                case 6:
+                    logout();
                 default:
                     System.out.println("Invalid option.");
                     break;
             }
         }
 
-        // Customer functionality: Check balance
-        private static void checkBalance() {
-            if (loggedInUser instanceof Customer) {
-                Customer customer = (Customer) loggedInUser;
-                System.out.println("Balance: " + customer.getAccount().checkBalance());
-            } else {
-                System.out.println("Access Denied.");
+    public static void mainMenu(){
+        while (x == 1) {
+            System.out.println("1. Register");
+            System.out.println("2. Login");
+            System.out.println("3. Exit");
+            System.out.println("Choose an option:");
+            choice = scanner.nextInt();
+            scanner.nextLine();
+            switch (choice) {
+                case 1:
+                    registerUser();
+                    break;
+                case 2:
+                    login();
+                    break;
+                case 3:
+                    System.out.println("Thanks for banking with us. Have a nice day!");
+                    return;
             }
         }
+    }
 
-        // Customer functionality: Transfer funds
-        private static void transferFunds() {
-            if (loggedInUser instanceof Customer) {
-                Customer customer = (Customer) loggedInUser;
-                System.out.print("Enter recipient's user ID: ");
-                String recipientId = scanner.nextLine();
-                System.out.print("Enter transfer amount: ");
-                double amount = scanner.nextDouble();
-                scanner.nextLine(); // Consume newline
-
-                // Find recipient customer
-                User recipient = userService.getAllUsers(loggedInUser).stream()
-                        .filter(u -> u.getUserId().equals(recipientId) && u instanceof Customer)
-                        .findFirst().orElse(null);
-
-                if (recipient != null) {
-                    BankAccount recipientAccount = ((Customer) recipient).getAccount();
-                    if (customer.getAccount().transferFunds(recipientAccount, amount)) {
-                        System.out.println("Transfer successful.");
-                    } else {
-                        System.out.println("Transfer failed (check balance or amount).");
-                    }
-                } else {
-                    System.out.println("Recipient not found.");
-                }
-            } else {
-                System.out.println("Access Denied.");
+        // Admin Menu Options
+        private static void showAdminMenu () {
+            System.out.println("1. Register new user");
+            System.out.println("2. Login user");
+            System.out.println("3. View All Users");
+            System.out.println("4. Delete User");
+            System.out.println("5. Logout");
+            System.out.print("Choose an option: ");
+            choice = scanner.nextInt();
+            switch (choice) {
+                case 1:
+                    registerUser();
+                    break;
+                case 2:
+                    login();
+                    break;
+                case 3:
+                    viewUsers();
+                    break;
+                case 4:
+                    deleteUser();
+                case 5:
+                    logout();
+                default:
+                    System.out.println("Invalid option.");
+                    break;
             }
 
 
     }
+
+    public static void logout(){
+        x=1;
+    }
+
+
+
 }
